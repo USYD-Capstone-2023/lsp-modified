@@ -295,7 +295,7 @@ class Lightshow(object):
             print("<TESTING> pin:" + str(pin))
             hc.set_light(pin, True, brightness[pin])
 
-        print("<TESTING> LOOK HERE " + str(hc.led) + "\n")
+        print("<TESTING> hc.led object: " + str(hc.led) + "\n")
 
         if hc.led:
             print("<TESTING> hc\n")
@@ -303,6 +303,7 @@ class Lightshow(object):
                 leds = brightness[self.physical_gpio_len:]
             else:
                 leds = brightness[:cm.hardware.gpio_len]
+                print("leds: " + str(leds) + "\n")
 
             for led_instance in hc.led:
                 led_instance.write_all(leds)

@@ -92,13 +92,12 @@ class Hardware(object):
 
         self.led = None
         
-        print("<TESTING> NONE IS BAD, !NONE IS GOOD" + str(self.cm.configs.led))
+        print("<TESTING> LED config file: " + str(self.cm.configs.led))
 
         if self.cm.configs.led:
             self.led = list()
             if self.cm.configs.led_multiprocess:
                 # NOTE i think u can change the led colours here
-                print("fine here")
                 LEDManager.register('LED', led_module.Led)      
                 for lc in self.cm.configs.led:
                     self.cm.set_led(config_file=lc)
@@ -1071,13 +1070,9 @@ if __name__ == "__main__":
     # use custom_channel_mapping if defined.
     ccm = False
 
-    print("<TESING> ARE WE IN 1")
-
     lights = [int(lit) for lit in args.light.split(',')]
 
     if -1 in lights:
-
-        print("<TESTING> ARE WE IN HERE")
         
         lights = range(0, cm.hardware.gpio_len)
 
