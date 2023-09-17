@@ -1,68 +1,16 @@
-#!/usr/bin/env python
-#
-# Licensed under the BSD license.  See full license in LICENSE file.
-# http://www.lightshowpi.org/
-#
-# Author: Micah Wedemeyer
-# Author: Tom Enos (tomslick.ca@gmail.com)
-
-
-"""Empty wrapper module for wiringpi
-
-This module is a place holder for virtual hardware to run a simulated lightshow
-an a pc.  This module is not yet functional.
-"""
-
-# Setup
+import tcp_connection
 def wiringPiSetup(*args):
-    pass
-
+    print("Setting up")
+    #tcp_connection.connect()
 
 def wiringPiSetupSys(*args):
-    pass
+    print("called wiringpi setup sys")
 
+def pinMode(pin, pwd):
+    print("Pin "+ str(pin) + " set MODE to "+ str(pwd))
+    #tcp_connection.send_data(pin, "M" + str(pwd))
 
-def pinMode(*args):
-    pass
-
-
-# Pin Writes
-def softPwmCreate(*args):
-    pass
-
-
-def softPwmWrite(*args):
-    pass
-
-
-def digitalWrite(*args):
-    pass
-
-
-# Devices
-def mcp23017Setup(*args):
-    pass
-
-
-def mcp23s17Setup(*args):
-    pass
-
-
-def mcp23016Setup(*args):
-    pass
-
-
-def mcp23008Setup(*args):
-    pass
-
-
-def mcp23s08Setup(*args):
-    pass
-
-
-def sr595Setup(*args):
-    pass
-
-
-def pcf8574Setup(*args):
+def digitalWrite(pin,pwd):
+    print("Pin "+ str(pin) + " set to "+ str(pwd))
+    #tcp_connection.send_data(pin,pwd)
     pass

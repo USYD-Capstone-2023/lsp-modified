@@ -63,7 +63,9 @@ signal.signal(signal.SIGINT, signal.SIG_IGN)
 is_a_raspberryPI = Platform.platform_detect() == 1
 
 if is_a_raspberryPI:
-    import wiringpipy as wiringpi
+    # Commented line below and replaced since wiringpipy not supported
+    #import wiringpipy as wiringpi
+    import wiring_pi as wiringpi
 else:
     # if this is not a RPi
     import wiring_pi as wiringpi
@@ -89,9 +91,14 @@ class Hardware(object):
         self.broadcast = self.network.broadcast
 
         self.led = None
+        
+        print("<TESTING> NONE IS BAD, !NONE IS GOOD" + str(self.cm.configs.led))
+
         if self.cm.configs.led:
             self.led = list()
             if self.cm.configs.led_multiprocess:
+                # NOTE i think u can change the led colours here
+                print("fine here")
                 LEDManager.register('LED', led_module.Led)      
                 for lc in self.cm.configs.led:
                     self.cm.set_led(config_file=lc)
@@ -100,10 +107,12 @@ class Hardware(object):
                     self.cm.led.multiprocess = True
                     self.led.append(self.ledmanager.LED(self.cm.led))
             else:
+                print("fine here")
                 for lc in self.cm.configs.led:
                     self.cm.set_led(config_file=lc)
                     self.cm.led.multiprocess = False
                     self.led.append(led_module.Led(self.cm.led))
+                    #Lprint("<TESTING> " + str(self.cm.led))
 
         self.create_lights()
         self.set_overrides()
@@ -331,7 +340,8 @@ class Hardware(object):
 
     def initialize(self,reset=True):
         """Set pins as outputs and start all lights in the off state."""
-        wiringpi.wiringPiSetupPY()
+        # Changed from wiringPiSetupPY -> wiringPiSetup()
+        wiringpi.wiringPiSetup()
         self.enable_device()
         self.set_pins_as_outputs()
         if reset:
@@ -358,20 +368,23 @@ class Channel(object):
         self.always_off = False
         self.inverted = False
 
+        # removed PY from functions calls
         if self.pwm:
-            self.action = lambda b: wiringpi.softPwmWritePY(self.pin_number,
+            self.action = lambda b: wiringpi.softPwmWrite(self.pin_number,
                                                           int(b * self.pwm_max))
         elif piglow:
-            self.action = lambda b: wiringpi.analogWritePY(self.pin_number + 577, int(b * 255))
+            self.action = lambda b: wiringpi.analogWrite(self.pin_number + 577, int(b * 255))
         else:
-            self.action = lambda b: wiringpi.digitalWritePY(self.pin_number, int(b > 0.5))
+            self.action = lambda b: wiringpi.digitalWrite(self.pin_number, int(b*255))
+            #self.action = lambda b: wiringpi.digitalWrite(self.pin_number, int(b > 0.5))
 
+    # pinModePY -> pinMode
     def set_as_input(self):
         """
         set up this pin as input
         """
         self.inout = 'pin is input'
-        wiringpi.pinModePY(self.pin_number, 0)
+        wiringpi.pinMode(self.pin_number, 0)
 
     def set_as_output(self):
         """
@@ -381,7 +394,7 @@ class Channel(object):
         if self.pwm:
             wiringpi.softPwmCreatePY(self.pin_number, 0, self.pwm_max)
         else:
-            wiringpi.pinModePY(self.pin_number, 1)
+            wiringpi.pinMode(self.pin_number, 1)
 
     def set_always_on(self, value):
         """
@@ -1057,9 +1070,15 @@ if __name__ == "__main__":
     pwm_speed = float(args.pwm_speed)
     # use custom_channel_mapping if defined.
     ccm = False
+
+    print("<TESING> ARE WE IN 1")
+
     lights = [int(lit) for lit in args.light.split(',')]
 
     if -1 in lights:
+
+        print("<TESTING> ARE WE IN HERE")
+        
         lights = range(0, cm.hardware.gpio_len)
 
         if cm.audio_processing.custom_channel_mapping != 0 and len(

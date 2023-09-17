@@ -53,10 +53,12 @@ if cm.led.led_configuration == "MATRIX":
 
 else:
     try:
+        print("LED Count: "+ str(led.led_count))
         for i in range(0,led.led_count):
             print("LED on = " + str(i))
-            led.led.set(i,colors.White)
+            led.led.set(i,colors.Red)
             led.led.push_to_driver()
+            print("<TESTING> led: " + str(i) + " colour: "+str(colors.Red))
             time.sleep(float(args.sleep))
             led.all_leds_off()
         led.led.push_to_driver()

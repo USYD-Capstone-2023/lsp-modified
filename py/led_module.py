@@ -127,7 +127,6 @@ class Led(object):
                              c_order=self.channel_order)
 
     def serial_setup(self):
-
         if len(self.led_config.device_address):
             packet = util.generate_header(4, 0)
             com = serial.Serial(self.led_config.device_address, baudrate=self.led_config.baud_rate, timeout=0.2)
@@ -214,7 +213,6 @@ class Led(object):
     def write(self, pin, color):
 
         self.led.set(pin, scale(color_map[color], color))
-
         self.led.push_to_driver()
 
     def write_full(self, pin_list):

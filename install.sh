@@ -60,7 +60,7 @@ install_init() {
     all_supported="ls "
 
     case $DISTRO in
-        archarm|raspbian)
+        archarm|debian)
             log Configuring installation for detected distro="'$DISTRO'"
             source $INSTALL_DIR/install-scripts/$DISTRO
             verify "Error importing configuration from install-scripts/$DISTRO"
@@ -146,9 +146,11 @@ pip3 install --upgrade git+https://github.com/pettazz/pygooglevoice.git
 verify "Installation of pygooglevoice failed"
 
 # Install wiringpipy
-log Installing wiringpipy...
-pip3 install --upgrade git+https://broken2048@bitbucket.org/broken2048/wiringpipy.git
-verify "Installation of wiringpipy failed"
+
+# commented out by Anthony 
+#log Installing wiringpipy...
+#pip3 install --upgrade git+https://broken2048@bitbucket.org/broken2048/wiringpipy.git
+#verify "Installation of wiring
 
 # Optionally add a line to /etc/sudoers
 if [ -f /etc/sudoers ]; then

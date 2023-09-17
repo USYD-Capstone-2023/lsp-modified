@@ -92,7 +92,7 @@ import Platform
 import fft
 from prepostshow import PrePostShow
 import RunningStats
-
+import tcp_connection
 
 # Make sure SYNCHRONIZED_LIGHTS_HOME environment variable is set
 HOME_DIR = os.getenv("SYNCHRONIZED_LIGHTS_HOME")
@@ -148,6 +148,7 @@ cm = hc.cm
 
 if not args.playlist:
     args.playlist=cm.lightshow.playlist_path
+
 
 class Lightshow(object):
     def __init__(self):
@@ -238,6 +239,9 @@ class Lightshow(object):
         :param matrix: row of data from cache matrix
         :type matrix: list
         """
+
+        print(matrix)
+
         if self.sequence_type == 'auto':
             brightness = matrix - self.mean + (self.std * self.sd_low)
             brightness = (brightness / (self.std * (self.sd_low + self.sd_high))) \
@@ -278,14 +282,23 @@ class Lightshow(object):
             self.terminal.curses_render(brightness)
             return
 
+        # NOTE printint out brightness
+        print(brightness)
+
         # in the instance a single channel is defined convert scalar back into array
         if not hasattr(brightness, "__len__"):
+            print("<TESTING> if not hasattr...")
             brightness = np.array([brightness])
 
         for pin in range(len(brightness[:self.physical_gpio_len])):
+            print("<TESTING> phy gpio len: " +  str(self.physical_gpio_len))
+            print("<TESTING> pin:" + str(pin))
             hc.set_light(pin, True, brightness[pin])
 
+        print("<TESTING> LOOK HERE " + str(hc.led) + "\n")
+
         if hc.led:
+            print("<TESTING> hc\n")
             if cm.led.led_channel_configuration == "EXTEND":
                 leds = brightness[self.physical_gpio_len:]
             else:
@@ -375,6 +388,8 @@ class Lightshow(object):
             time.sleep(float(cm.fm.ps_increment_delay))
 
     def set_audio_device(self):
+        
+        print("set audio device")
 
         if cm.fm.enabled:
             self.set_fm()
@@ -390,7 +405,13 @@ class Lightshow(object):
                                    periodsize=self.chunk_size)
 
             self.output = lambda raw_data: output_device.write(raw_data)
+            print("<TESTING> self.output: " + str(self.output))
 
+        print("test play song in unity by signal")
+
+        #tcp_connection.send_music_flag()
+
+        print("test successfully")
     def set_audio_source(self):
         stream_reader = None
         outq = None
@@ -525,6 +546,7 @@ class Lightshow(object):
                 if len(matrix_buffer) > light_delay:
                     matrix = matrix_buffer[light_delay]
                     self.update_lights(matrix)
+                    
 
     def load_custom_config(self):
         """
@@ -704,7 +726,13 @@ class Lightshow(object):
 
         # Output a bit about what we're about to play to the logs
         num_frames = str(self.music_file.getnframes() / self.sample_rate)
-        log.info("Playing: " + self.song_filename + " (" + num_frames + " sec)")
+        
+        #print("<TESTING> Playing: " + self.song_filename + " (" + num_frames + " sec)")
+        
+        ## Tell Unity to play music
+        #tcp_connection.send_music_flag() 
+
+        #log.info("Playing: " + self.song_filename + " (" + num_frames + " sec)")
 
     def setup_cache(self):
         """Setup the cache_matrix, std and mean
@@ -873,17 +901,22 @@ class Lightshow(object):
 
         # get the next song to play
         self.get_song()
+        print("<TESTING> getting song")
 
         # load custom configuration from file
         self.load_custom_config()
+        print("<TESTING> load_custom_config")
 
         # Initialize Lights
         self.network.set_playing()
         hc.initialize()
+        print("<TESTING> initialize lights")
+
 
         # Handle the pre/post show
         play_now = int(cm.get_state('play_now', "0"))
-
+        print("<TESTING> play_now: " + str(play_now))
+        
         self.network.unset_playing()
 
         if not play_now:
@@ -901,8 +934,10 @@ class Lightshow(object):
 
         # setup audio file and output device
         self.setup_audio()
+        print("<TESTING> setup_audio")
 
         if self.sequence_type == 'auto':
+            print("<TESTING> AUTO")
             # setup our cache_matrix, std, mean
             self.setup_cache()
         elif self.sequence_type == 'csv':
@@ -937,8 +972,8 @@ class Lightshow(object):
                 sys.stdout.write("\rGenerating sync file for :%s %d%%" % (self.song_filename,
                                                                           percentage))
                 sys.stdout.flush()
+                print("<TESTING> Generating sync file for :%s %d%%" % (self.song_filename, percentage))
 
-            sys.stdout.write("\rGenerating sync file for :%s %d%%" % (self.song_filename, 100))
             sys.stdout.flush()
 
             data = b''
@@ -951,6 +986,7 @@ class Lightshow(object):
             self.output(data)
 
             if self.sequence_type == 'auto':
+                print("<TESTING> self.sequence_type == 'auto'")
                 # Control lights with cached timing values if they exist
                 matrix = None
                 if self.cache_found and args.readcache:
@@ -971,8 +1007,10 @@ class Lightshow(object):
 
                 if len(matrix_buffer) > self.light_delay:
                     matrix = matrix_buffer[self.light_delay]
+                    print("<TESTING> UPDATE LIGHTS IS RUN")
                     self.update_lights(matrix)
             elif self.sequence_type == 'csv':
+                print("<TESTING> self.sequence_type == 'csv'")
                 ssf_read = song_sequence_file.readline()
                 if ssf_read:
                     ssf_line = list(map(float,ssf_read.strip().split(','))) # Get next line in CSV sequence file
@@ -983,10 +1021,13 @@ class Lightshow(object):
                 if len(matrix_buffer) > self.light_delay:
                     matrix = matrix_buffer[self.light_delay]
                     self.update_lights(matrix)
+                    print("<TESTING> MATRIX")
 
             # Read next chunk of data from music song_filename
             data = self.music_file.readframes(self.chunk_size)
             row += 1
+
+            # print("<TESTING> data: " + str(data) + "\n\n")
 
             # Load new application state in case we've been interrupted
             cm.load_state()
@@ -1007,6 +1048,7 @@ class Lightshow(object):
 
         # We're done, turn it all off and clean up things ;)
         hc.clean_up()
+        print("<TESTING> clean up")
 
     def network_client(self):
         """Network client support
@@ -1089,3 +1131,5 @@ if __name__ == "__main__":
 
     else:
         lightshow.play_song()
+
+
