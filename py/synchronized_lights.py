@@ -291,7 +291,7 @@ class Lightshow(object):
             brightness = np.array([brightness])
 
         for pin in range(len(brightness[:self.physical_gpio_len])):
-            print("<TESTING> phy gpio len: " +  str(self.physical_gpio_len))
+            #print("<TESTING> phy gpio len: " +  str(self.physical_gpio_len))
             print("<TESTING> pin:" + str(pin))
             hc.set_light(pin, True, brightness[pin])
 

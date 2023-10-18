@@ -367,13 +367,14 @@ class Channel(object):
         self.always_off = False
         self.inverted = False
 
+
         # removed PY from functions calls
         if self.pwm:
             self.action = lambda b: wiringpi.softPwmWrite(self.pin_number,
                                                           int(b * self.pwm_max))
         elif piglow:
             self.action = lambda b: wiringpi.analogWrite(self.pin_number + 577, int(b * 255))
-        else:
+        else: 
             self.action = lambda b: wiringpi.digitalWrite(self.pin_number, int(b*255))
             #self.action = lambda b: wiringpi.digitalWrite(self.pin_number, int(b > 0.5))
 
